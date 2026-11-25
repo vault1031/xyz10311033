@@ -1,0 +1,15 @@
+You carry three numbers, A, B and C.
+
+A has 2 parts and B has 4 parts, each part 127 bits. Pack each
+number's parts with no padding between them, first part highest.
+C is a single number. Write A, B and C big-endian in exactly
+32, 64 and 18 bytes, and join them: A || B || C.
+
+seed   = Argon2id(A || B || C, salt, m = 8388608 KiB, t = 1, p = 1, 64 bytes)
+r1, r2 = for i = 1, 2: SHAKE-256(seed || byte i), 128 bytes, as an integer
+         with bits 1023 and 0 set, then the next prime at or above it
+M      = 2 * k1 * k2 * r1 * r2
+
+M is a multiple of the order of every element modulo N. That is enough
+to factor N. The factors open wrapped_key (RSA-OAEP, SHA-256).
+The key opens message.enc (AES-256-GCM).
